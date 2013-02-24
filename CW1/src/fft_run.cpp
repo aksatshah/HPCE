@@ -40,14 +40,14 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < 50; ++i)
 		fft_tbb(n, &in[0], &out[0]);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
+	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/50.0 << std::endl;
 
-	std::cout << "\nTBB Values:" << std::endl;
+	// std::cout << "\nTBB Values:" << std::endl;
 	// for(int j=0;j<n;j++){
 	// 	fprintf(stdout, "%.16lg, %.16lg, %.16lg, %.16lg\n", real(in[j]), imag(in[j]), real(out[j]), imag(out[j]));
 	// }
 
 	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds() << std::endl;
-	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/50.0 << std::endl;
 	
 	/* To test this, you can try loading the output into matlab. Load
 		the output as a four column matrix x. Then the input is:
