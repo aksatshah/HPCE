@@ -9,9 +9,6 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <math.h>
-#include <iostream>
-#include <stdio.h>
-#include <tbb/tick_count.h>
 
 struct node
 {
