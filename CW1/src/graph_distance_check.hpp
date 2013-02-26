@@ -1,5 +1,5 @@
-#ifndef graph_distance_hpp
-#define graph_distance_hpp
+#ifndef graph_distance_check_hpp
+#define graph_distance_check_hpp
 
 #include <vector>
 #include <deque>
@@ -19,7 +19,7 @@ struct node
 	std::vector<int> edges;
 };
 
-// This is just a simple platform independent rng, returns an integer in [0,maxn]
+// This is just a simple platform independent random number generator, returns an integer in [0,maxn]
 unsigned rng(unsigned &seed, unsigned maxn)
 {
 	seed=(seed*1664525UL*+1013904223UL)&0xFFFFFFFF;
@@ -37,9 +37,10 @@ std::vector<node> build_graph(int n)
 	
 	unsigned seed=1;
 	
+	// randomly assign edge to random node
 	for(int i=0;i<10*n;i++){
-		int a=rng(seed,n-1);
-		int b=rng(seed,n-1);
+		int a=rng(seed,n-1); // Randomly select which node to add edge to
+		int b=rng(seed,n-1); // Randomly select destination node
 		
 		res[a].edges.push_back(b);
 	}
@@ -59,27 +60,43 @@ void dump_graph(const std::vector<node> &nodes)
 
 /*! This is the function we are interested in the execution time of. */
 // Here n is the number of nodes (nodes.size())
-std::vector<int> graph_distance(const std::vector<node> &nodes, int start)
+// Each edge is of unit distance
+std::vector<int> graph_distance_check(const std::vector<node> &nodes, int start)
 {
+	tbb::tick_count graph_start = tbb::tick_count::now();
 	std::vector<int> distance(nodes.size(), INT_MAX); // all nodes start at infinite distance
 	
 	// a list of (id,dist)
-	std::deque<std::pair<int,int> > todo;
+	std::deque<std::pair<int,int> > todo; // double ended queue - efficient access but not contiguous memory
 	todo.push_back(std::make_pair(start,0));
-	
+/*	std::deque<int>::size_type sz = todo.size();
+
+	for (int i=0; i<sz; i++) {
+		std::cout << "todo = " << todo[i].first << "		" << todo[i].second << std::endl;
+	}*/
+
 	while(!todo.empty()){
+		//std::cout << "todo front = first:" << todo.front().first << "		second:" << todo.front().second << std::endl;
 		std::pair<int,int> curr=todo.front();
 		todo.pop_front();
 		
+		// if its the first time hitting this node then check
 		if(distance[curr.first]==INT_MAX){
-			distance[curr.first]=curr.second;
+			//std::cout << "in if" << std::endl;
+			distance[curr.first]=curr.second; // distance from first node is curr.second
 			for(int i=0;i<nodes[curr.first].edges.size();i++){
 				todo.push_back(std::make_pair(nodes[curr.first].edges[i],curr.second+1));
 			}
+			for(int i=0;i<distance.size();i++){
+				if (distance[i] == INT_MAX)
+					break;
+			}
+			//std::cout << "time taken = " << ((tbb::tick_count::now()) - graph_start).seconds() << std::endl;
 		}
 	}
-	
-	return distance;
+	//tbb::tick_count graph_end = tbb::tick_count::now();
+	//std::cout << "time ended = " << (graph_end - graph_start).seconds() << std::endl;
+ 	return distance;
 }
 
 #endif

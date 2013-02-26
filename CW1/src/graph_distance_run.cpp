@@ -1,10 +1,12 @@
-#include "graph_distance.hpp"
+//#include "graph_distance.hpp"
+#include "graph_distance_check.hpp"
 
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <vector>
 #include <iostream>
+
+#include <tbb/tick_count.h>
 
 int main(int argc, char *argv[])
 {
@@ -22,10 +24,19 @@ int main(int argc, char *argv[])
 	// take that into account when timing it?
 	int start=rand()%n;
 	// Note that it is only graph_distance that we care about
-	std::vector<int> tmp=graph_distance(graph, start);
-	for(int i=0;i<tmp.size();i++){
+/*	tbb::tick_count serial_start = tbb::tick_count::now();
+	std::vector<int> tmp1=graph_distance(graph, start);
+	tbb::tick_count serial_end = tbb::tick_count::now();
+*/
+	tbb::tick_count check_start = tbb::tick_count::now();
+	std::vector<int> tmp2=graph_distance_check(graph, start);
+	tbb::tick_count check_end = tbb::tick_count::now();
+
+/*	for(int i=0;i<tmp.size();i++){
 		fprintf(stdout, "dist(%d->%d) = %d\n", start, i, tmp[i]);
-	}
-	
+	}*/
+//	std::cout << "Serial time = " << (serial_end - serial_start).seconds() << std::endl;
+	std::cout << "Check time = " << (check_end - check_start).seconds() << std::endl;
+
 	return 0;
 }
