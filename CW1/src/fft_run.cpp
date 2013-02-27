@@ -1,5 +1,6 @@
 #include "fft.hpp"
 #include "fft_tbb.hpp"
+#include "fft_opt.hpp"
 #include <vector>
 #include <stdio.h>
 #include <math.h>
@@ -46,6 +47,13 @@ int main(int argc, char *argv[])
 	// for(int j=0;j<n;j++){
 	// 	fprintf(stdout, "%.16lg, %.16lg, %.16lg, %.16lg\n", real(in[j]), imag(in[j]), real(out[j]), imag(out[j]));
 	// }
+
+	tbb::tick_count opt_start = tbb::tick_count::now();
+	for (int i = 0; i < 50; ++i)
+		fft_opt(n, &in[0], &out[0]);
+	tbb::tick_count opt_end = tbb::tick_count::now();
+	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/50.0 << std::endl;
+
 
 	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds() << std::endl;
 	

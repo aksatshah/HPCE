@@ -6,6 +6,29 @@
 #include <tbb/parallel_for.h>
 #include "tbb/blocked_range2d.h"
 
+class mat_par_for {
+	public:
+		mat_t *dst;
+		const mat_t a;
+		const mat_t b;
+
+		mat_par_for(mat_t *dst, const mat_t a, const mat_t b):
+			dst(dst), a(a), b(b)
+			{}
+
+		void operator() (const tbb::blocked_range2d<int>& range) const {
+			for(unsigned row=range.rows().begin();row<range.rows().end();row++){
+				for(unsigned col=range.cols().begin();col<range.cols().end();col++){
+					double acc=0.0;
+					for(unsigned i=0;i<a.cols;i++){
+						acc += a.at(row,i) * b.at(i,col);
+					}
+					dst->at(row,col) = acc;
+				}
+			}
+		}
+};
+
 class mat_mat_mul_opt2_class : public tbb::task {
 	public:
 		mat_t dst;
@@ -16,16 +39,9 @@ class mat_mat_mul_opt2_class : public tbb::task {
 			dst(dst), a(a), b(b)
 			{}
 
-		tbb::task* execute() {#include "tbb/blocked_range2d.h"
-			if((dst.rows==8) || (dst.cols==8)){
-				tbb::parallel_for(tbb::blocked_range<int>(0,))
-				for(unsigned row=0;row<dst.rows;row++){
-					for(unsigned k=0;k<b.rows;k++){
-						for(unsigned col=0;col<dst.cols;col++){
-							dst.at(row,col) += a.at(row,k) * b.at(k,col);
-						}
-					}
-				}
+		tbb::task* execute() {
+			if((dst.rows==16) || (dst.cols==16)){
+				tbb::parallel_for(tbb::blocked_range2d<int>(0,dst.rows,0,dst.cols),mat_par_for(&dst, a, b));
 			}else{
 				local_mat_t right(dst.rows, dst.cols);
 				
@@ -61,6 +77,18 @@ class mat_mat_mul_opt2_class : public tbb::task {
 			}
 			return NULL;
 		}
+
+/*		void par_for(mat_t dst, const mat_t a, const mat_t b) (const tbb::blocked_range2d<int>& range) const {
+			for(unsigned row=range.rows().begin();row<range.rows().end();row++){
+				for(unsigned col=range.cols().begin();col<range.cols().end();col++){
+					double acc=0.0;
+					for(unsigned i=0;i<a.cols;i++){
+						acc += a.at(row,i) * b.at(i,col);
+					}
+					dst.at(row,col) = acc;
+				}
+			}
+		}*/
 };
 
 void mat_mat_mul_opt2(mat_t dst, const mat_t a, const mat_t b) {

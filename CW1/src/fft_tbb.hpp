@@ -16,7 +16,7 @@
 
 
 
-class fft_impl : public tbb::task {
+class fft_tbb_impl : public tbb::task {
 	public:
 		int n; 
 		std::complex<double> wn;
@@ -25,7 +25,7 @@ class fft_impl : public tbb::task {
 		std::complex<double> *pOut; 
 		int sOut;
 
-		fft_impl( int n, std::complex<double> wn, 
+		fft_tbb_impl( int n, std::complex<double> wn, 
 			const std::complex<double> *pIn, int sIn, 
 			std::complex<double> *pOut, int sOut):
 
@@ -43,8 +43,8 @@ class fft_impl : public tbb::task {
 
 				set_ref_count(3);
 
-				fft_impl &split_left = *new(allocate_child()) fft_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
-				fft_impl &split_right = *new(allocate_child()) fft_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+				fft_tbb_impl &split_left = *new(allocate_child()) fft_tbb_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
+				fft_tbb_impl &split_right = *new(allocate_child()) fft_tbb_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 			 	spawn(split_left);
 			 	spawn(split_right);
 
@@ -70,7 +70,7 @@ void fft_tbb(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
 	double angle = pi2/n;
 	std::complex<double> wn(cos(angle), sin(angle));
 
-	fft_impl &root = *new(tbb::task::allocate_root()) fft_impl(n, wn, pIn, 1, pOut, 1);
+	fft_tbb_impl &root = *new(tbb::task::allocate_root()) fft_tbb_impl(n, wn, pIn, 1, pOut, 1);
 	tbb::task::spawn_root_and_wait(root);
 }
 

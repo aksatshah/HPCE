@@ -2,11 +2,12 @@
 #include "mat_mat_mul_tbb.hpp"
 #include "mat_mat_mul_opt.hpp"
 #include "mat_mat_mul_opt2.hpp"
+#include "mat_mat_mul_opt3.hpp"
 #include "mat_t.hpp"
 #include <tbb/tick_count.h>
 #include <tbb/task.h>
 
-#define ITER 5
+#define ITER 20
 #define MAX_ERROR 0.00000001
 
 bool check(
@@ -36,13 +37,15 @@ int main(int argc, char *argv[])
 		n=atoi(argv[1]);
 		
 	local_mat_t A(n,n), B(n,n);
-	local_mat_t R_orig(n,n), R_tbb(n,n), R_opt(n,n);
+	local_mat_t R_orig(n,n), R_tbb(n,n), R_opt(n,n), R_opt2(n,n), R_opt3(n,n);
 	
 	//randomly generate input matrices
 	A.randomise();
 	B.randomise();
 	//A.dump(std::cout);
 	//B.dump(std::cout);
+
+
 
 	//run serial code ITER number of times and get average time
 	tbb::tick_count serial_start = tbb::tick_count::now();
@@ -56,6 +59,8 @@ int main(int argc, char *argv[])
 	else
 		std::cout << "Original code correct!" << std::endl;
 
+
+
 	//run tbb code ITER number of times and get average time
 	tbb::tick_count tbb_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; ++i) 
@@ -68,6 +73,8 @@ int main(int argc, char *argv[])
 	else
 		std::cout << "TBB code correct!" << std::endl;
 	
+
+
 	//run opt code ITER number of times and get average time
 	tbb::tick_count opt_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; i++)
@@ -81,17 +88,36 @@ int main(int argc, char *argv[])
 	else
 		std::cout << "Optimized code correct!" << std::endl;
 
+
+
 	//run opt code ITER number of times and get average time
-	tbb::tick_count opt_start = tbb::tick_count::now();
+	tbb::tick_count opt2_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; i++)
-		mat_mat_mul_opt2(R_opt, A, B);
-	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "OPT2 Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+		mat_mat_mul_opt2(R_opt2, A, B);
+	tbb::tick_count opt2_end = tbb::tick_count::now();
+	std::cout << "OPT2 Time = " << (opt2_end - opt2_start).seconds()/ITER << std::endl;
 	//R_orig.dump(std::cout);
-	//R_opt.dump(std::cout);
-	if (!(check(R_orig,R_opt,n))) //check against original results for correct result
-		std::cout << "Error in optimized code!" << std::endl;
+	//R_opt2.dump(std::cout);
+	if (!(check(R_orig,R_opt2,n))) //check against original results for correct result
+		std::cout << "Error in optimized2 code!" << std::endl;
 	else
 		std::cout << "Optimized2 code correct!" << std::endl;
+
+
+
+	//run opt code ITER number of times and get average time
+	tbb::tick_count opt3_start = tbb::tick_count::now();
+	for (int i = 0; i < ITER; i++)
+		mat_mat_mul_opt3(R_opt3, A, B);
+	tbb::tick_count opt3_end = tbb::tick_count::now();
+	std::cout << "OPT3 Time = " << (opt3_end - opt3_start).seconds()/ITER << std::endl;
+	//R_orig.dump(std::cout);
+	//R_opt3.dump(std::cout);
+	if (!(check(R_orig,R_opt3,n))) //check against original results for correct result
+		std::cout << "Error in optimized3 code!" << std::endl;
+	else
+		std::cout << "Optimized3 code correct!" << std::endl;
 	return 0;
+
+
 }
