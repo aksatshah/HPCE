@@ -15,17 +15,7 @@ class mat_mat_mul_opt_class : public tbb::task {
 			{}
 
 		tbb::task* execute() {
-/*			if((dst.rows==1) || (dst.cols==1)){
-				for(unsigned row=0;row<dst.rows;row++){						//row = i
-					for(unsigned col=0;col<dst.cols;col++){					//col = j
-						double acc=0.0;
-						for(unsigned i=0;i<a.cols;i++){						//i = k
-							acc += a.at(row,i) * b.at(i,col);
-						}
-						dst.at(row,col) = acc;
-					}
-				}*/
-			if((dst.rows==4) || (dst.cols==4)){
+			if((dst.rows==8) || (dst.cols==8)){
 				for(unsigned row=0;row<dst.rows;row++){
 					for(unsigned k=0;k<b.rows;k++){
 						for(unsigned col=0;col<dst.cols;col++){
