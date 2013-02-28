@@ -9,7 +9,7 @@
 	(pIn,sIn) = Base and stride of input data
 	(pOut,Sout) = Base and stride of output data
 */
-void fft_impl_orig(
+void fft_impl(
 	int n, std::complex<double> wn,
 	const std::complex<double> *pIn, int sIn,
 	std::complex<double> *pOut, int sOut
@@ -22,8 +22,8 @@ void fft_impl_orig(
     }else{
 		unsigned m = n/2;
 
-		fft_impl_orig(m,wn*wn,pIn,2*sIn,pOut,sOut);
-		fft_impl_orig(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+		fft_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
+		fft_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 		 
 		std::complex<double> w=std::complex<double>(1.0, 0.0);
 
@@ -37,12 +37,12 @@ void fft_impl_orig(
 	}
 }
 	
-void fft_orig(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
+void fft(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
 {
 	const double pi2=6.283185307179586476925286766559;
 	double angle = pi2/n;
 	std::complex<double> wn(cos(angle), sin(angle));
-	fft_impl_orig(n, wn, pIn, 1, pOut, 1);
+	fft_impl(n, wn, pIn, 1, pOut, 1);
 }
 
 #endif

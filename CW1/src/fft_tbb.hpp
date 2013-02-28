@@ -14,8 +14,6 @@
 	(pOut,Sout) = Base and stride of output data
 */
 
-
-
 class fft_tbb_impl : public tbb::task {
 	public:
 		int n; 

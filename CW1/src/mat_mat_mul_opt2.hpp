@@ -77,18 +77,6 @@ class mat_mat_mul_opt2_class : public tbb::task {
 			}
 			return NULL;
 		}
-
-/*		void par_for(mat_t dst, const mat_t a, const mat_t b) (const tbb::blocked_range2d<int>& range) const {
-			for(unsigned row=range.rows().begin();row<range.rows().end();row++){
-				for(unsigned col=range.cols().begin();col<range.cols().end();col++){
-					double acc=0.0;
-					for(unsigned i=0;i<a.cols;i++){
-						acc += a.at(row,i) * b.at(i,col);
-					}
-					dst.at(row,col) = acc;
-				}
-			}
-		}*/
 };
 
 void mat_mat_mul_opt2(mat_t dst, const mat_t a, const mat_t b) {

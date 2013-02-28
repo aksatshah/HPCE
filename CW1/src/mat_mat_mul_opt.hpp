@@ -4,6 +4,8 @@
 #include "mat_t.hpp"
 #include <tbb/task.h>
 
+#define THRESH 8
+
 class mat_mat_mul_opt_class : public tbb::task {
 	public:
 		mat_t dst;
@@ -15,12 +17,14 @@ class mat_mat_mul_opt_class : public tbb::task {
 			{}
 
 		tbb::task* execute() {
-			if((dst.rows==8) || (dst.cols==8)){
+			if((dst.rows==THRESH) || (dst.cols==THRESH)){
 				for(unsigned row=0;row<dst.rows;row++){
-					for(unsigned k=0;k<b.rows;k++){
-						for(unsigned col=0;col<dst.cols;col++){
-							dst.at(row,col) += a.at(row,k) * b.at(k,col);
+					for(unsigned col=0;col<dst.cols;col++){
+						double acc=0.0;
+						for(unsigned i=0;i<a.cols;i++){
+							acc += a.at(row,i) * b.at(i,col);
 						}
+						dst.at(row,col) = acc;
 					}
 				}
 			}else{

@@ -7,7 +7,7 @@
 #include <iostream>
 #include <tbb/parallel_for.h>
 
-#define THRESH 256
+#define THRESH 16
 
 /* Does a recursive FFT
 	n = Number of elements (must be a power of two)
@@ -65,19 +65,22 @@ class fft_opt_impl : public tbb::task {
 	    	}else{
 				unsigned m = n/2;
 
-				set_ref_count(3);
-
-				fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
-				fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-			 	spawn(split_left);
-			 	spawn(split_right);
-
-			 	wait_for_all();
+				if (n < THRESH) {
+					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_opt_impl_left.serial();
+					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+					fft_opt_impl_right.serial();
+				}else{
+					set_ref_count(3);
+					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+				 	spawn(split_left);
+				 	spawn(split_right);
+				 	wait_for_all();
+			 	}
+			 	
 				
 				std::complex<double> w=std::complex<double>(1.0, 0.0);
-				if (m > THRESH) {
-					tbb::parallel_for(tbb::blocked_range<int>(0,m),fft_par_for(pOut, &w, wn, m));
-				}else{
 					for (unsigned j=0;j<m;j++){
 				  		std::complex<double> t1 = w*pOut[m+j];
 				  		std::complex<double> t2 = pOut[j]-t1;
@@ -86,9 +89,43 @@ class fft_opt_impl : public tbb::task {
 				  		w = w*wn;
 					}
 				}
-			}
 			return NULL;
 		}
+
+		void serial() {
+			if (n == 1){
+				pOut[0] = pIn[0];
+	    	}else if (n == 2){
+				pOut[0] = pIn[0]+pIn[sIn];
+				pOut[sOut] = pIn[0]-pIn[sIn];
+	    	}else{
+				unsigned m = n/2;
+
+				if (n < THRESH) {
+					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_opt_impl_left.serial();
+					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+					fft_opt_impl_right.serial();
+				}else{
+					set_ref_count(3);
+					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+				 	spawn(split_left);
+				 	spawn(split_right);
+				 	wait_for_all();
+			 	}
+			 	
+				std::complex<double> w=std::complex<double>(1.0, 0.0);
+					for (unsigned j=0;j<m;j++){
+				  		std::complex<double> t1 = w*pOut[m+j];
+				  		std::complex<double> t2 = pOut[j]-t1;
+				  		pOut[j] = pOut[j]+t1;                 /*  pOut[j] = pOut[j] + w^i pOut[m+j] */
+				  		pOut[j+m] = t2;                          /*  pOut[j] = pOut[j] - w^i pOut[m+j] */
+				  		w = w*wn;
+					}
+					
+				}
+			}
 };
 	
 void fft_opt(int n, const std::complex<double> *pIn, std::complex<double> *pOut)

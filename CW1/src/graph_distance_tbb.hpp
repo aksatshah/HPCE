@@ -16,7 +16,6 @@
 #include "graph_distance.hpp"
 
 
-
 class graph_distance_class{
 	public:
 		tbb::concurrent_queue<std::pair<int,int> > *todo;

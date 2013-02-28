@@ -1,5 +1,5 @@
 #include "graph_distance.hpp"
-//#include "graph_distance_check.hpp"
+#include "graph_distance_opt.hpp"
 #include "graph_distance_tbb.hpp"
 
 #include <stdio.h>
@@ -31,6 +31,10 @@ int main(int argc, char *argv[])
 
 	tbb::tick_count check_start = tbb::tick_count::now();
 	std::vector<int> tmp2=graph_distance_tbb(graph, start);
+	tbb::tick_count check_end = tbb::tick_count::now();
+
+	tbb::tick_count check_start = tbb::tick_count::now();
+	std::vector<int> tmp3=graph_distance_opt(graph, start);
 	tbb::tick_count check_end = tbb::tick_count::now();
 
 	for(int i=0;i<tmp.size();i++){
