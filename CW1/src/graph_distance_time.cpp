@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_orig =graph_distance(graph, start);
 	tbb::tick_count serial_end = tbb::tick_count::now();
-	std::cout << "Serial time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	std::cout << (serial_end - serial_start).seconds()/ITER << std::endl;
 
 
 	tmp_tbb=graph_distance_tbb(graph, start); //warmup run
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_tbb=graph_distance_tbb(graph, start);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
-	std::cout << "TBB time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
+	std::cout << (tbb_end - tbb_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_tbb,n))) //check against original results for correct result
 		std::cout << "Error in tbb code!" << std::endl;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_opt=graph_distance_opt(graph, start);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "Opt time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	std::cout << (opt_end - opt_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_opt,n))) //check against original results for correct result
 		std::cout << "Error in opt code!" << std::endl;
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_seq=graph_distance_seq(graph, start);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	std::cout << "Seq time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	std::cout << (seq_end - seq_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_seq,n))) //check against original results for correct result
 		std::cout << "Error in opt code!" << std::endl;

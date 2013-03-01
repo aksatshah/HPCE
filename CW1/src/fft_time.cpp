@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft(n, &in[0], &out[0]);
 	tbb::tick_count serial_end = tbb::tick_count::now();
-	std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	std::cout << (serial_end - serial_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_tbb(n, &in[0], &out_tbb[0]);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
-	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
+	std::cout << (tbb_end - tbb_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_tbb[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_opt(n, &in[0], &out_opt[0]);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	std::cout << (opt_end - opt_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_opt[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_seq(n, &in[0], &out_seq[0]);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	std::cout << (seq_end - seq_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_seq[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 

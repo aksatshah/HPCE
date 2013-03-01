@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 		mat_mat_mul(R_orig, A, B);
 	tbb::tick_count serial_end = tbb::tick_count::now();
 
-	std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	std::cout << (serial_end - serial_start).seconds()/ITER << std::endl;
 
 
 	mat_mat_mul_tbb(R_tbb, A, B); //warmup run
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; i++)
 		mat_mat_mul_opt(R_opt, A, B);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	std::cout << (opt_end - opt_start).seconds()/ITER << std::endl;
 
 	if (!(check(R_orig,R_opt,n))) //check against original results for correct result
 		std::cout << "Error in optimized code!" << std::endl;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; i++)
 		mat_mat_mul_seq(R_seq, A, B);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	std::cout << (seq_end - seq_start).seconds()/ITER << std::endl;
 
 	if (!(check(R_orig,R_seq,n))) //check against original results for correct result
 		std::cout << "Error in optimized code!" << std::endl;
