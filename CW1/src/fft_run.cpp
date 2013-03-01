@@ -1,14 +1,6 @@
 #include "fft.hpp"
-#include "fft_tbb.hpp"
-#include "fft_opt.hpp"
 #include <vector>
 #include <stdio.h>
-#include <math.h>
-#include <cstdlib>
-#include <tbb/tick_count.h>
-#include <iostream>
-
-#define ITER 2
 
 int main(int argc, char *argv[])
 {
@@ -21,47 +13,17 @@ int main(int argc, char *argv[])
 	
 	int log2n=atoi(argv[1]);
 	int n=1<<log2n;
-
-	std::vector<std::complex<double> > in(n, 0.0), in_opt(n, 0.0), out(n), out_opt(n);
+	
+	std::vector<std::complex<double> > in(n, 0.0), out(n);
 	for(int j=0;j<n;j++){
 		in[j]=std::complex<double>(rand()/(double)(RAND_MAX) - 0.5, rand()/(double)(RAND_MAX) - 0.5);
-		in_opt[j]=in[j];
 	}
 	
-	tbb::tick_count serial_start = tbb::tick_count::now();
-	for (int i = 0; i < ITER; ++i)
-		fft(n, &in[0], &out[0]);
-	tbb::tick_count serial_end = tbb::tick_count::now();
-	std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	fft(n, &in[0], &out[0]);
 	
-/*	std::cout << "Serial Values:" << std::endl;
 	for(int j=0;j<n;j++){
 		fprintf(stdout, "%.16lg, %.16lg, %.16lg, %.16lg\n", real(in[j]), imag(in[j]), real(out[j]), imag(out[j]));
-	}*/
-
-	tbb::tick_count tbb_start = tbb::tick_count::now();
-	for (int i = 0; i < ITER; ++i)
-		fft_tbb(n, &in[0], &out[0]);
-	tbb::tick_count tbb_end = tbb::tick_count::now();
-	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
-
-	// std::cout << "\nTBB Values:" << std::endl;
-	// for(int j=0;j<n;j++){
-	// 	fprintf(stdout, "%.16lg, %.16lg, %.16lg, %.16lg\n", real(in[j]), imag(in[j]), real(out[j]), imag(out[j]));
-	// }
-
-	tbb::tick_count opt_start = tbb::tick_count::now();
-	for (int i = 0; i < ITER; ++i)
-		fft_opt(n, &in_opt[0], &out_opt[0]);
-	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
-
-/*	std::cout << "OPT Values:" << std::endl;
-	for(int j=0;j<n;j++){
-		fprintf(stdout, "%.16lg, %.16lg, %.16lg, %.16lg\n", real(in_opt[j]), imag(in_opt[j]), real(out_opt[j]), imag(out_opt[j]));
-	}*/
-
-	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds() << std::endl;
+	}
 	
 	/* To test this, you can try loading the output into matlab. Load
 		the output as a four column matrix x. Then the input is:

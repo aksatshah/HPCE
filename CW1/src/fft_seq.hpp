@@ -1,5 +1,5 @@
-#ifndef FFT_OPT_HPP
-#define FFT_OPT_HPP
+#ifndef FFT_SEQ_HPP
+#define FFT_SEQ_HPP
 
 #include <complex>
 #include <stdio.h>
@@ -17,7 +17,7 @@
 */
 
 
-class fft_opt_impl : public tbb::task {
+class fft_seq_impl {
 	public:
 		int n; 
 		std::complex<double> wn;
@@ -26,34 +26,34 @@ class fft_opt_impl : public tbb::task {
 		std::complex<double> *pOut; 
 		int sOut;
 
-		fft_opt_impl( int n, std::complex<double> wn, 
+		fft_seq_impl( int n, std::complex<double> wn, 
 			const std::complex<double> *pIn, int sIn, 
 			std::complex<double> *pOut, int sOut):
 
 			n(n), wn(wn), pIn(pIn), sIn(sIn), pOut(pOut), sOut(sOut)
 			{}
 
-		tbb::task* execute() {
+
+		void operate() {
 			if (n == 1){
 				pOut[0] = pIn[0];
 	    	}else if (n == 2){
 				pOut[0] = pIn[0]+pIn[sIn];
 				pOut[sOut] = pIn[0]-pIn[sIn];
 	    	}else{
+
 				unsigned m = n/2;
 
-				if (n < THRESH) {
-					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
-					fft_opt_impl_left.serial();
-					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-					fft_opt_impl_right.serial();
+				if (n < THRESH) { //used for agglomeration in optimized form
+					fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_seq_impl_left.serial();
+					fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+					fft_seq_impl_right.serial();
 				}else{
-					set_ref_count(3);
-					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
-					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-				 	spawn(split_left);
-				 	spawn(split_right);
-				 	wait_for_all();
+				 	fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
+					fft_seq_impl_left.operate();
+					fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+					fft_seq_impl_right.operate();
 			 	}
 			 	
 				
@@ -62,11 +62,10 @@ class fft_opt_impl : public tbb::task {
 				  		std::complex<double> t1 = w*pOut[m+j];
 				  		std::complex<double> t2 = pOut[j]-t1;
 				  		pOut[j] = pOut[j]+t1;                 /*  pOut[j] = pOut[j] + w^i pOut[m+j] */
-				  		pOut[j+m] = t2;                          /*  pOut[j] = pOut[j] - w^i pOut[m+j] */
+				  		pOut[j+m] = t2;                       /*  pOut[j] = pOut[j] - w^i pOut[m+j] */
 				  		w = w*wn;
 					}
 				}
-			return NULL;
 		}
 
 		void serial() {
@@ -78,26 +77,17 @@ class fft_opt_impl : public tbb::task {
 	    	}else{
 				unsigned m = n/2;
 
-				//if (n < THRESH) {
-					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
-					fft_opt_impl_left.serial();
-					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-					fft_opt_impl_right.serial();
-/*				}else{
-					set_ref_count(3);
-					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
-					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-				 	spawn(split_left);
-				 	spawn(split_right);
-				 	wait_for_all();
-			 	}*/
+				fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
+				fft_seq_impl_left.serial();
+				fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
+				fft_seq_impl_right.serial();
 			 	
 				std::complex<double> w=std::complex<double>(1.0, 0.0);
 					for (unsigned j=0;j<m;j++){
 				  		std::complex<double> t1 = w*pOut[m+j];
 				  		std::complex<double> t2 = pOut[j]-t1;
 				  		pOut[j] = pOut[j]+t1;                 /*  pOut[j] = pOut[j] + w^i pOut[m+j] */
-				  		pOut[j+m] = t2;                          /*  pOut[j] = pOut[j] - w^i pOut[m+j] */
+				  		pOut[j+m] = t2;                       /*  pOut[j] = pOut[j] - w^i pOut[m+j] */
 				  		w = w*wn;
 					}
 					
@@ -105,14 +95,15 @@ class fft_opt_impl : public tbb::task {
 			}
 };
 	
-void fft_opt(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
+void fft_seq(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
 {
 	const double pi2=6.283185307179586476925286766559;
 	double angle = pi2/n;
 	std::complex<double> wn(cos(angle), sin(angle));
 
-	fft_opt_impl &root = *new(tbb::task::allocate_root()) fft_opt_impl(n, wn, pIn, 1, pOut, 1);
-	tbb::task::spawn_root_and_wait(root);
+	fft_seq_impl root(n, wn, pIn, 1, pOut, 1);
+	root.operate();
+	
 }
 
 #endif
