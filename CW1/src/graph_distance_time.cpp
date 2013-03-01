@@ -12,7 +12,7 @@
 #include "tbb/concurrent_vector.h"
 #include "tbb/task_scheduler_init.h"
 
-#define ITER 100
+#define ITER 3
 
 bool check(
 	std::vector<int> orig_result,
@@ -44,13 +44,13 @@ int main(int argc, char *argv[])
 
 	std::vector<node> graph=build_graph(n);
 	
-	dump_graph(graph);
+	//dump_graph(graph);
 
 	std::vector<int> tmp_orig, tmp_tbb, tmp_opt, tmp_seq;
 		
 	// The run-time can vary, depending on where you start from. How should you
 	// take that into account when timing it?
-	int start=rand()%n;
+	int start=0;//rand()%n;
 	// Note that it is only graph_distance that we care about
 
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_orig =graph_distance(graph, start);
 	tbb::tick_count serial_end = tbb::tick_count::now();
-	std::cout << "Serial time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	//std::cout << "Serial time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
 
 
 	tmp_tbb=graph_distance_tbb(graph, start); //warmup run
@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_tbb=graph_distance_tbb(graph, start);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
-	std::cout << "TBB time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
+	//std::cout << "TBB time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_tbb,n))) //check against original results for correct result
 		std::cout << "Error in tbb code!" << std::endl;
@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_opt=graph_distance_opt(graph, start);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "Opt time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	//std::cout << "Opt time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_opt,n))) //check against original results for correct result
 		std::cout << "Error in opt code!" << std::endl;
@@ -89,9 +89,12 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		tmp_seq=graph_distance_seq(graph, start);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	std::cout << "Seq time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	//std::cout << "Seq time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
 
 	if (!(check(tmp_orig,tmp_seq,n))) //check against original results for correct result
 		std::cout << "Error in opt code!" << std::endl;
+
+	std::cout << n << ", " << (serial_end - serial_start).seconds()/ITER << ", " << (tbb_end - tbb_start).seconds()/ITER << ", " << (opt_end - opt_start).seconds()/ITER << ", " << (seq_end - seq_start).seconds()/ITER << std::endl;
+
 	return 0;
 }

@@ -19,16 +19,16 @@
 class graph_distance_class{
 	public:
 		tbb::concurrent_queue<std::pair<int,int> > *todo;
-		const std::vector<node> nodes;
+		const std::vector<node> *nodes;
 		std::pair<int,int> curr;
 
-		graph_distance_class( tbb::concurrent_queue<std::pair<int,int> > *todo, const std::vector<node> nodes, std::pair<int,int> curr):
+		graph_distance_class( tbb::concurrent_queue<std::pair<int,int> > *todo, const std::vector<node> *nodes, std::pair<int,int> curr):
 			todo(todo), nodes(nodes), curr(curr)
 			{}
 
 		void operator() (const tbb::blocked_range<int>& range) const {
-			for(int i = range.begin();i < range.end(); i++)
-				todo->push(std::make_pair(nodes[curr.first].edges[i],curr.second+1));
+			for(int i = range.begin();i != range.end(); i++)
+				todo->push(std::make_pair((*nodes)[curr.first].edges[i],curr.second+1));
 		}
 };
 
@@ -44,12 +44,12 @@ std::vector<int> graph_distance_tbb(const std::vector<node> &nodes, int start)
 	
 	while(!todo.empty()){
 		std::pair<int,int> curr;
-		todo.try_pop(curr);
+		while (!todo.try_pop(curr)){}
 		
 		if(distance[curr.first]==INT_MAX){
 			distance[curr.first]=curr.second;
 			//parallel for to split for loop into smaller sizes
-			tbb::parallel_for(tbb::blocked_range<int>(0,nodes[curr.first].edges.size()),graph_distance_class(&todo, nodes, curr));
+			tbb::parallel_for(tbb::blocked_range<int>(0,nodes[curr.first].edges.size()),graph_distance_class(&todo, &nodes, curr));
 		}
 	}
 	

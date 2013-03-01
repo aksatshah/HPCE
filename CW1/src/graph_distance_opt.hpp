@@ -44,7 +44,7 @@ std::vector<int > graph_distance_opt(const std::vector<node> &nodes, int start)
 		
 		if(distance[curr.first]==INT_MAX){
 			distance[curr.first]=curr.second;
-			tbb::parallel_for(tbb::blocked_range<int>(0,nodes[curr.first].edges.size()),graph_distance_class(&todo, nodes, curr));
+			tbb::parallel_for(tbb::blocked_range<int>(0,nodes[curr.first].edges.size()),graph_distance_class(&todo, &nodes, curr));
 /*			if (finish_check(distance,nodes)) //check to finish searching when all values have been found - not used but left for demo
 				return distance;*/
 		}

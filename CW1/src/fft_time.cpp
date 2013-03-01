@@ -56,14 +56,14 @@ int main(int argc, char *argv[])
 		in[j]=std::complex<double>(rand()/(double)(RAND_MAX) - 0.5, rand()/(double)(RAND_MAX) - 0.5);
 	}
 
-	/*fft(n, &in[0], &out[0]); //warmup run	
+	fft(n, &in[0], &out[0]); //warmup run	
 	tbb::tick_count serial_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; ++i)
 		fft(n, &in[0], &out[0]);
 	tbb::tick_count serial_end = tbb::tick_count::now();
 	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out[0]))) //check against original results for correct result
-		std::cout << "Error in original code!" << std::endl;*/
+		std::cout << "Error in original code!" << std::endl;
 
 
 	fft_tbb(n, &in[0], &out_tbb[0]); //warmup run
@@ -86,16 +86,16 @@ int main(int argc, char *argv[])
 		std::cout << "Error in original code!" << std::endl;
 
 
-	/*fft_seq(n, &in[0], &out_seq[0]); //warmup run
+	fft_seq(n, &in[0], &out_seq[0]); //warmup run
 	tbb::tick_count seq_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; ++i)
 		fft_seq(n, &in[0], &out_seq[0]);
 	tbb::tick_count seq_end = tbb::tick_count::now();
 	//std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_seq[0]))) //check against original results for correct result
-		std::cout << "Error in original code!" << std::endl;*/
+		std::cout << "Error in original code!" << std::endl;
 
-		std::cout << log2n << ", " << /*(serial_end - serial_start).seconds()/ITER << ", " <<*/ (tbb_end - tbb_start).seconds()/ITER << ", " << (opt_end - opt_start).seconds()/ITER << ", " /*<< (seq_end - seq_start).seconds()/ITER */<< std::endl;
+	std::cout << log2n << ", " << (serial_end - serial_start).seconds()/ITER << ", " << (tbb_end - tbb_start).seconds()/ITER << ", " << (opt_end - opt_start).seconds()/ITER << ", " << (seq_end - seq_start).seconds()/ITER << std::endl;
 
 	
 	/* To test this, you can try loading the output into matlab. Load
