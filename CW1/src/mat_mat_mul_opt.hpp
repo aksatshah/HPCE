@@ -4,7 +4,7 @@
 #include "mat_t.hpp"
 #include <tbb/task.h>
 
-#define THRESH 8
+#define THRESH 16
 
 class mat_mat_mul_opt_class : public tbb::task {
 	public:
