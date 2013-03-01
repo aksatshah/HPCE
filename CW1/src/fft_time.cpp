@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft(n, &in[0], &out[0]);
 	tbb::tick_count serial_end = tbb::tick_count::now();
-	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
+	std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_tbb(n, &in[0], &out_tbb[0]);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
-	//std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
+	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_tbb[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_opt(n, &in[0], &out_opt[0]);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	//std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_opt[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
@@ -91,13 +91,11 @@ int main(int argc, char *argv[])
 	for (int i = 0; i < ITER; ++i)
 		fft_seq(n, &in[0], &out_seq[0]);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	//std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
 	if (!(check(n, &out[0] ,&out_seq[0]))) //check against original results for correct result
 		std::cout << "Error in original code!" << std::endl;
 
-	std::cout << log2n << ", " << (serial_end - serial_start).seconds()/ITER << ", " << (tbb_end - tbb_start).seconds()/ITER << ", " << (opt_end - opt_start).seconds()/ITER << ", " << (seq_end - seq_start).seconds()/ITER << std::endl;
-
-	
+		
 	/* To test this, you can try loading the output into matlab. Load
 		the output as a four column matrix x. Then the input is:
 			in=x(:,1)+x(:,2)*i
