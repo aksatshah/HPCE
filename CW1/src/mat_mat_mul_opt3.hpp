@@ -36,7 +36,7 @@ class mat_mat_mul_opt3_class : public tbb::task {
 			{}
 
 		tbb::task* execute() {
-			if((dst.rows==8) || (dst.cols==8)){
+			if((dst.rows<=8) || (dst.cols<=8)){
 				tbb::parallel_for(tbb::blocked_range<int>(0,dst.rows),mat_par_for3(&dst, a, b));
 			}else{
 				local_mat_t right(dst.rows, dst.cols);
@@ -73,18 +73,6 @@ class mat_mat_mul_opt3_class : public tbb::task {
 			}
 			return NULL;
 		}
-
-/*		void par_for(mat_t dst, const mat_t a, const mat_t b) (const tbb::blocked_range2d<int>& range) const {
-			for(unsigned row=range.rows().begin();row<range.rows().end();row++){
-				for(unsigned col=range.cols().begin();col<range.cols().end();col++){
-					double acc=0.0;
-					for(unsigned i=0;i<a.cols;i++){
-						acc += a.at(row,i) * b.at(i,col);
-					}
-					dst.at(row,col) = acc;
-				}
-			}
-		}*/
 };
 
 void mat_mat_mul_opt3(mat_t dst, const mat_t a, const mat_t b) {

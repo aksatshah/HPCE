@@ -30,6 +30,7 @@ class mat_mat_mul_tbb_class : public tbb::task {
 				
 				set_ref_count(9);
 
+				//spawn child for each quad of matrix to seperate workload
 				mat_mat_mul_tbb_class &dst_ul = *new(allocate_child()) mat_mat_mul_tbb_class(dst.quad(0,0), a.quad(0,0), b.quad(0,0));
 				mat_mat_mul_tbb_class &dst_ur = *new(allocate_child()) mat_mat_mul_tbb_class(dst.quad(0,1), a.quad(0,0), b.quad(0,1));
 				mat_mat_mul_tbb_class &dst_dl = *new(allocate_child()) mat_mat_mul_tbb_class(dst.quad(1,0), a.quad(1,0), b.quad(0,0));

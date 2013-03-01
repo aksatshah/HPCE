@@ -48,6 +48,7 @@ std::vector<int> graph_distance_tbb(const std::vector<node> &nodes, int start)
 		
 		if(distance[curr.first]==INT_MAX){
 			distance[curr.first]=curr.second;
+			//parallel for to split for loop into smaller sizes
 			tbb::parallel_for(tbb::blocked_range<int>(0,nodes[curr.first].edges.size()),graph_distance_class(&todo, nodes, curr));
 		}
 	}

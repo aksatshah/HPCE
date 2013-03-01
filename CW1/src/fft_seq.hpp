@@ -45,11 +45,13 @@ class fft_seq_impl {
 				unsigned m = n/2;
 
 				if (n < THRESH) { //used for agglomeration in optimized form
+					//recursively split tree to remove overhead from parallel tasks
 					fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
 					fft_seq_impl_left.serial();
 					fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 					fft_seq_impl_right.serial();
 				}else{
+					//serial implementation of fft - previously spawning fft
 				 	fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
 					fft_seq_impl_left.operate();
 					fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
@@ -77,6 +79,7 @@ class fft_seq_impl {
 	    	}else{
 				unsigned m = n/2;
 
+				//recursively split tree to remove overhead from parallel tasks
 				fft_seq_impl fft_seq_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
 				fft_seq_impl_left.serial();
 				fft_seq_impl fft_seq_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);

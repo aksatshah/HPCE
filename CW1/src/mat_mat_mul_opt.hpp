@@ -17,7 +17,7 @@ class mat_mat_mul_opt_class : public tbb::task {
 			{}
 
 		tbb::task* execute() {
-			if((dst.rows==THRESH) || (dst.cols==THRESH)){
+			if((dst.rows<=THRESH) || (dst.cols<=THRESH)){ //set threshold to only run serial for loop
 				for(unsigned row=0;row<dst.rows;row++){
 					for(unsigned col=0;col<dst.cols;col++){
 						double acc=0.0;
@@ -32,6 +32,7 @@ class mat_mat_mul_opt_class : public tbb::task {
 				
 				set_ref_count(9);
 
+				//spawn child for each quad of matrix to seperate workload
 				mat_mat_mul_opt_class &dst_ul = *new(allocate_child()) mat_mat_mul_opt_class(dst.quad(0,0), a.quad(0,0), b.quad(0,0));
 				mat_mat_mul_opt_class &dst_ur = *new(allocate_child()) mat_mat_mul_opt_class(dst.quad(0,1), a.quad(0,0), b.quad(0,1));
 				mat_mat_mul_opt_class &dst_dl = *new(allocate_child()) mat_mat_mul_opt_class(dst.quad(1,0), a.quad(1,0), b.quad(0,0));
@@ -53,7 +54,7 @@ class mat_mat_mul_opt_class : public tbb::task {
 				spawn(right_dr);
 
 				wait_for_all();
-
+				
 				for(unsigned row=0;row<dst.rows;row++){
 					for(unsigned col=0;col<dst.cols;col++){
 						dst.at(row,col) += right.at(row,col);

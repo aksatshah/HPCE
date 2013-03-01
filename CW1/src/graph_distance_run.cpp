@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 	
 	dump_graph(graph);
 
-	std::vector<int> tmp, tmp2;
-	tbb::concurrent_vector<int> tmp3;
+	std::vector<int> tmp, tmp2, tmp3;
+	//tbb::concurrent_vector<int> tmp3;
 		
 	// The run-time can vary, depending on where you start from. How should you
 	// take that into account when timing it?

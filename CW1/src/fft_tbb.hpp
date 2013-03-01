@@ -41,6 +41,7 @@ class fft_tbb_impl : public tbb::task {
 
 				set_ref_count(3);
 
+				//continiously spawn 2 children per each parent to create tree
 				fft_tbb_impl &split_left = *new(allocate_child()) fft_tbb_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
 				fft_tbb_impl &split_right = *new(allocate_child()) fft_tbb_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 			 	spawn(split_left);
@@ -68,6 +69,7 @@ void fft_tbb(int n, const std::complex<double> *pIn, std::complex<double> *pOut)
 	double angle = pi2/n;
 	std::complex<double> wn(cos(angle), sin(angle));
 
+	//spawn root of tree 
 	fft_tbb_impl &root = *new(tbb::task::allocate_root()) fft_tbb_impl(n, wn, pIn, 1, pOut, 1);
 	tbb::task::spawn_root_and_wait(root);
 }

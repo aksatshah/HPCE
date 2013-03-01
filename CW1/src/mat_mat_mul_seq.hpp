@@ -17,9 +17,9 @@ class mat_mat_mul_seq_class {
 			{}
 
 		void operate() {
-			if((dst.rows==THRESH) || (dst.cols==THRESH)){
-				for(unsigned row=0;row<dst.rows;row++){
-					for(unsigned col=0;col<dst.cols;col++){
+			if((dst.rows<=THRESH) || (dst.cols<=THRESH)){
+				for(unsigned row=0;row<dst.rows;row++){ //for every row in the matrix
+					for(unsigned col=0;col<dst.cols;col++){ //for every column in the matrix
 						double acc=0.0;
 						for(unsigned i=0;i<a.cols;i++){
 							acc += a.at(row,i) * b.at(i,col);
@@ -30,6 +30,7 @@ class mat_mat_mul_seq_class {
 			}else{
 				local_mat_t right(dst.rows, dst.cols);
 
+				//recursively create work
 				mat_mat_mul_seq_class dst_ul(dst.quad(0,0), a.quad(0,0), b.quad(0,0));
 				mat_mat_mul_seq_class dst_ur(dst.quad(0,1), a.quad(0,0), b.quad(0,1));
 				mat_mat_mul_seq_class dst_dl(dst.quad(1,0), a.quad(1,0), b.quad(0,0));
@@ -61,7 +62,7 @@ class mat_mat_mul_seq_class {
 };
 
 void mat_mat_mul_seq(mat_t dst, const mat_t a, const mat_t b) {
-	mat_mat_mul_seq_class root(dst, a, b);
+	mat_mat_mul_seq_class root(dst, a, b); //create root
 	root.operate();
 }
 

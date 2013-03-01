@@ -40,7 +40,7 @@ class mat_mat_mul_opt2_class : public tbb::task {
 			{}
 
 		tbb::task* execute() {
-			if((dst.rows==16) || (dst.cols==16)){
+			if((dst.rows<=16) || (dst.cols<=16)){
 				tbb::parallel_for(tbb::blocked_range2d<int>(0,dst.rows,0,dst.cols),mat_par_for(&dst, a, b));
 			}else{
 				local_mat_t right(dst.rows, dst.cols);

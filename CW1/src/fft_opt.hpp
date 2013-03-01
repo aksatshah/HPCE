@@ -42,12 +42,14 @@ class fft_opt_impl : public tbb::task {
 	    	}else{
 				unsigned m = n/2;
 
-				if (n < THRESH) {
+				if (n < THRESH) { //agglomeration - only spawn when below threshold
+					//recursively split tree to remove overhead from parallel tasks
 					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
 					fft_opt_impl_left.serial();
 					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 					fft_opt_impl_right.serial();
 				}else{
+					//continiously spawn 2 children per each parent to create tree
 					set_ref_count(3);
 					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
 					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
@@ -77,20 +79,11 @@ class fft_opt_impl : public tbb::task {
 				pOut[sOut] = pIn[0]-pIn[sIn];
 	    	}else{
 				unsigned m = n/2;
-
-				//if (n < THRESH) {
+					//recursively split tree to remove overhead from parallel tasks
 					fft_opt_impl fft_opt_impl_left(m,wn*wn,pIn,2*sIn,pOut,sOut);
 					fft_opt_impl_left.serial();
 					fft_opt_impl fft_opt_impl_right(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
 					fft_opt_impl_right.serial();
-/*				}else{
-					set_ref_count(3);
-					fft_opt_impl &split_left = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn,2*sIn,pOut,sOut);
-					fft_opt_impl &split_right = *new(allocate_child()) fft_opt_impl(m,wn*wn,pIn+sIn,2*sIn,pOut+sOut*m,sOut);
-				 	spawn(split_left);
-				 	spawn(split_right);
-				 	wait_for_all();
-			 	}*/
 			 	
 				std::complex<double> w=std::complex<double>(1.0, 0.0);
 					for (unsigned j=0;j<m;j++){

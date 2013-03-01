@@ -1,16 +1,13 @@
 #include "mat_mat_mul.hpp"
 #include "mat_mat_mul_tbb.hpp"
 #include "mat_mat_mul_opt.hpp"
-/*#include "mat_mat_mul_opt2.hpp"
-#include "mat_mat_mul_opt3.hpp"
-#include "mat_mat_mul_opt4.hpp"*/
 #include "mat_mat_mul_seq.hpp"
 #include "mat_t.hpp"
 #include <tbb/tick_count.h>
 #include <tbb/task.h>
 #include "tbb/task_scheduler_init.h"
 
-#define ITER 20
+#define ITER 3
 #define MAX_ERROR 0.00000001
 
 bool check(
@@ -53,58 +50,50 @@ int main(int argc, char *argv[])
 
 	tbb::task_scheduler_init init(x);
 
+	mat_mat_mul(R_orig, A, B); //warmup run
 	//run serial code ITER number of times and get average time
 	tbb::tick_count serial_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; ++i)
 		mat_mat_mul(R_orig, A, B);
 	tbb::tick_count serial_end = tbb::tick_count::now();
 
-	std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
-	if (!(check(R_orig,R_orig,n))) //check against original results for correct result
-		std::cout << "Error in original code!" << std::endl;
+	//std::cout << "Serial Time = " << (serial_end - serial_start).seconds()/ITER << std::endl;
 
 
+	mat_mat_mul_tbb(R_tbb, A, B); //warmup run
 	//run tbb code ITER number of times and get average time
 	tbb::tick_count tbb_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; ++i) 
 		mat_mat_mul_tbb(R_tbb, A, B);
 	tbb::tick_count tbb_end = tbb::tick_count::now();
 
-	std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
+	//std::cout << "TBB Time = " << (tbb_end - tbb_start).seconds()/ITER << std::endl;
 	if (!(check(R_orig,R_tbb,n))) //check against original results for correct result
 		std::cout << "Error in tbb code!" << std::endl;
 	
 
+	mat_mat_mul_opt(R_opt, A, B); //warmup run
 	//run opt code ITER number of times and get average time
 	tbb::tick_count opt_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; i++)
 		mat_mat_mul_opt(R_opt, A, B);
 	tbb::tick_count opt_end = tbb::tick_count::now();
-	std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
+	//std::cout << "OPT Time = " << (opt_end - opt_start).seconds()/ITER << std::endl;
 
 	if (!(check(R_orig,R_opt,n))) //check against original results for correct result
 		std::cout << "Error in optimized code!" << std::endl;
 
 
+	mat_mat_mul_seq(R_seq, A, B); //warmup run
 	//run opt code ITER number of times and get average time
 	tbb::tick_count seq_start = tbb::tick_count::now();
 	for (int i = 0; i < ITER; i++)
 		mat_mat_mul_seq(R_seq, A, B);
 	tbb::tick_count seq_end = tbb::tick_count::now();
-	std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
+	//std::cout << "SEQ Time = " << (seq_end - seq_start).seconds()/ITER << std::endl;
 
 	if (!(check(R_orig,R_seq,n))) //check against original results for correct result
 		std::cout << "Error in optimized code!" << std::endl;
 
-
-/*	//run opt code ITER number of times and get average time
-	tbb::tick_count opt4_start = tbb::tick_count::now();
-	for (int i = 0; i < ITER; i++)
-		mat_mat_mul_seq(R_opt4, A, B);
-	tbb::tick_count opt4_end = tbb::tick_count::now();
-	std::cout << "OPT4 Time = " << (opt4_end - opt4_start).seconds()/ITER << std::endl;
-
-	if (!(check(R_orig,R_opt4,n))) //check against original results for correct result
-		std::cout << "Error in optimized code!" << std::endl;*/
-
+	std::cout << n << ", " << (serial_end - serial_start).seconds()/ITER << ", " << (tbb_end - tbb_start).seconds()/ITER << ", " << (opt_start - opt_end).seconds()/ITER << ", " << (seq_end - seq_start).seconds()/ITER << std::endl;
 }
